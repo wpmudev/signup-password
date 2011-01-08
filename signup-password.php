@@ -1,11 +1,13 @@
 <?php
 /*
 Plugin Name: Signup Password
-Plugin URI: 
-Description:
-Author: Andrew Billits
-Version: 1.0.5
-Author URI:
+Plugin URI: http://premium.wpmudev.org/project/set-password-on-wordpress-mu-blog-creation
+Description: Set Password on WordPress Multisite Blog Creation
+Author: S H Mohanjith (Incsub), Andrew Billits (Incsub)
+Version: 1.0.6
+Author URI: http://premium.wpmudev.org
+Network: true
+WDP ID: 35
 */
 
 /* 
@@ -32,6 +34,7 @@ $signup_password_use_encryption = 'no'; //Either 'yes' OR 'no'
 //------------------------------------------------------------------------//
 //---Hook-----------------------------------------------------------------//
 //------------------------------------------------------------------------//
+add_action('init', 'signup_password_init');
 add_action('wp_head', 'signup_password_stylesheet');
 add_action('signup_extra_fields', 'signup_password_fields');
 add_filter('wpmu_validate_user_signup', 'signup_password_filter');
@@ -41,6 +44,13 @@ add_filter('random_password', 'signup_password_random_password_filter');
 //------------------------------------------------------------------------//
 //---Functions------------------------------------------------------------//
 //------------------------------------------------------------------------//
+
+function signup_password_init() {
+	if ( !is_multisite() )
+		exit( 'The Signup Password plugin is only compatible with WordPress Multisite.' );
+		
+	load_plugin_textdomain('signup_password', false, dirname(plugin_basename(__FILE__)).'/languages');
+}
 
 function signup_password_encrypt($data) {
 	if(!isset($chars))
@@ -90,7 +100,7 @@ function signup_password_filter($content) {
 	$password_2 = $_POST['password_2'];
 	if ( !empty( $password_1 )  && $_POST['stage'] == 'validate-user-signup' ) {
 		if ( $password_1 != $password_2 ) {
-			$content['errors']->add('password', __('Passwords do not match.'));
+			$content['errors']->add('password', __('Passwords do not match.', 'signup_password'));
 		}
 	}
 	return $content;
@@ -162,18 +172,27 @@ function signup_password_fields_pass_through() {
 function signup_password_fields($errors) {
 	$error = $errors->get_error_message('password');
 	?>
-    <label for="password"><?php _e('Password'); ?>:</label>
+    <label for="password"><?php _e('Password', 'signup_password'); ?>:</label>
 		<?php
         if($error) {
 			echo '<p class="error">' . $error . '</p>';
         }
 		?>
 		<input name="password_1" type="password" id="password_1" value="" autocomplete="off" maxlength="20" /><br />
-		(<?php _e('Leave fields blank for a random password to be generated.') ?>)
-    <label for="password"><?php _e('Confirm Password'); ?>:</label>
+		(<?php _e('Leave fields blank for a random password to be generated.', 'signup_password') ?>)
+    <label for="password"><?php _e('Confirm Password', 'signup_password'); ?>:</label>
 		<input name="password_2" type="password" id="password_2" value="" autocomplete="off" maxlength="20" /><br />
-		(<?php _e('Type your new password again.') ?>)
+		(<?php _e('Type your new password again.', 'signup_password') ?>)
 	<?php
 }
 
-?>
+if ( !function_exists( 'wdp_un_check' ) ) {
+	add_action( 'admin_notices', 'wdp_un_check', 5 );
+	add_action( 'network_admin_notices', 'wdp_un_check', 5 );
+
+	function wdp_un_check() {
+		if ( !class_exists( 'WPMUDEV_Update_Notifications' ) && current_user_can( 'edit_users' ) )
+			echo '<div class="error fade"><p>' . __('Please install the latest version of <a href="http://premium.wpmudev.org/project/update-notifications/" title="Download Now &raquo;">our free Update Notifications plugin</a> which helps you stay up-to-date with the most stable, secure versions of WPMU DEV themes and plugins. <a href="http://premium.wpmudev.org/wpmu-dev/update-notifications-plugin-information/">More information &raquo;</a>', 'wpmudev') . '</a></p></div>';
+	}
+}
+
