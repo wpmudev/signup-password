@@ -4,7 +4,7 @@ Plugin Name: Set Password on WordPress Multisite Blog Creation
 Plugin URI: http://premium.wpmudev.org/project/set-password-on-wordpress-mu-blog-creation
 Description: Set Password on WordPress Multisite Blog Creation
 Author: S H Mohanjith (Incsub), Andrew Billits (Incsub)
-Version: 1.0.6
+Version: 1.0.7
 Author URI: http://premium.wpmudev.org
 Network: true
 WDP ID: 35
@@ -27,15 +27,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+global $signup_password_form_printed;
 //------------------------------------------------------------------------//
 //---Config---------------------------------------------------------------//
 //------------------------------------------------------------------------//
 $signup_password_use_encryption = 'no'; //Either 'yes' OR 'no'
+$signup_password_form_printed = 0;
 //------------------------------------------------------------------------//
 //---Hook-----------------------------------------------------------------//
 //------------------------------------------------------------------------//
 add_action('init', 'signup_password_init');
-add_action('wp_head', 'signup_password_stylesheet');
+add_action('wp_footer', 'signup_password_stylesheet');
 add_action('signup_extra_fields', 'signup_password_fields');
 add_filter('wpmu_validate_user_signup', 'signup_password_filter');
 add_filter('signup_blogform', 'signup_password_fields_pass_through');
@@ -153,16 +155,23 @@ function signup_password_random_password_filter($password) {
 //------------------------------------------------------------------------//
 
 function signup_password_stylesheet() {
+	global $signup_password_form_printed;
+	
+	if ($signup_password_form_printed) {
 ?>
 <style type="text/css">
 	.mu_register #password_1,
 	.mu_register #password_2 { width:100%; font-size: 24px; margin:5px 0; }
 </style>
 <?php
+	}
 }
 
 function signup_password_fields_pass_through() {
+	global $signup_password_form_printed;
+	
 	if ( !empty( $_POST['password_1'] ) && !empty( $_POST['password_2'] ) ) {
+		$signup_password_form_printed = 1;
 		?>
         <input type="hidden" name="password_1" value="<?php echo $_POST['password_1']; ?>" />
 	    <?php
@@ -170,7 +179,10 @@ function signup_password_fields_pass_through() {
 }
 
 function signup_password_fields($errors) {
+	global $signup_password_form_printed;
+	
 	$error = $errors->get_error_message('password');
+	$signup_password_form_printed = 1;
 	?>
     <label for="password"><?php _e('Password', 'signup_password'); ?>:</label>
 		<?php
