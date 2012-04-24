@@ -9,6 +9,7 @@ Change Log:
 ----------------------------------------------------------------------
 - Fixed: 'password on signup plugin' conflicts with 'membership plugin' signup
   forms exist
+- French translations courtesy tribagora
 
 1.0.9 - 04/08/2012
 ----------------------------------------------------------------------
