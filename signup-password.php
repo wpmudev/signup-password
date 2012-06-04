@@ -70,7 +70,7 @@ function signup_password_encrypt($data) {
 	}
 	
 	// encrypt
-	$data = base64_encode(strtr(strtolower($data), $chars));
+	$data = base64_encode(strtr($data, $chars));
 	return $data;
 	
 }
