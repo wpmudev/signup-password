@@ -4,7 +4,7 @@ Plugin Name: Set Password on WordPress Multisite Blog Creation
 Plugin URI: http://premium.wpmudev.org/project/set-password-on-wordpress-mu-blog-creation
 Description: Set Password on WordPress Multisite Blog Creation
 Author: S H Mohanjith (Incsub), Andrew Billits (Incsub)
-Version: 1.1.0
+Version: 1.1.1
 Author URI: http://premium.wpmudev.org
 Network: true
 WDP ID: 35
@@ -38,6 +38,7 @@ $signup_password_form_printed = 0;
 //---Hook-----------------------------------------------------------------//
 //------------------------------------------------------------------------//
 add_action('init', 'signup_password_init');
+add_action('init', 'signup_password_init_sessions');
 add_action('wp_footer', 'signup_password_stylesheet');
 add_action('signup_extra_fields', 'signup_password_fields');
 add_filter('wpmu_validate_user_signup', 'signup_password_filter');
@@ -99,7 +100,7 @@ function signup_password_decrypt($data) {
 }
 
 function signup_password_filter($content) {
-	$password_1 = $_POST['password_1'];
+	$password_1 = isset($_POST['password_1'])?$_POST['password_1']:'';
 	$password_2 = isset($_POST['password_2'])?$_POST['password_2']:'';
 	if ( !empty( $password_1 )  && $_POST['stage'] == 'validate-user-signup' ) {
 		if ( $password_1 != $password_2 ) {
@@ -111,7 +112,7 @@ function signup_password_filter($content) {
 
 function signup_password_meta_filter($meta) {
 	global $signup_password_use_encryption;
-	$password_1 = $_POST['password_1'];
+	$password_1 = isset($_POST['password_1'])?$_POST['password_1']:'';
 	if ( !empty( $password_1 ) ) {
 		if ( $signup_password_use_encryption == 'yes' ) {
 			$password_1 = signup_password_encrypt($password_1);
@@ -174,8 +175,14 @@ function signup_password_fields_pass_through() {
 	if ( !empty( $_POST['password_1'] ) && !empty( $_POST['password_2'] ) ) {
 		$signup_password_form_printed = 1;
 		?>
-        <input type="hidden" name="password_1" value="<?php echo $_POST['password_1']; ?>" />
-	    <?php
+		<input type="hidden" name="password_1" value="<?php echo $_POST['password_1']; ?>" />
+		<?php
+		$_SESSION['password_1'] = $_POST['password_1'];
+	} else if (isset($_SESSION['password_1']) && !empty($_SESSION['password_1'])) {
+		$signup_password_form_printed = 1;
+		?>
+		<input type="hidden" name="password_1" value="<?php echo $_SESSION['password_1']; ?>" />
+		<?php
 	}
 }
 
@@ -197,6 +204,12 @@ function signup_password_fields($errors) {
 		<input name="password_2" type="password" id="password_2" value="" autocomplete="off" maxlength="20" /><br />
 		(<?php _e('Type your new password again.', 'signup_password') ?>)
 	<?php
+}
+
+function signup_password_init_sessions() {
+    if (!session_id()) {
+        session_start();
+    }
 }
 
 if ( !function_exists( 'wdp_un_check' ) ) {
