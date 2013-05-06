@@ -134,19 +134,31 @@ function signup_password_random_password_filter($password) {
 	if ( !empty($_POST['password_1']) ) {
 		$password = $_POST['password_1'];
 	} else if ( !empty( $key ) ) {
-		$signup = $wpdb->get_row("SELECT * FROM " . $wpdb->signups . " WHERE activation_key = '" . $key . "'");
-		if ( empty($signup) || $signup->active ) {
-			//bad key or already active
-		} else {
+		$signup = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM $wpdb->signups WHERE activation_key = '%s'",
+				$key
+			)
+		);
+		if ( ! ( empty($signup) || $signup->active ) ) {
 			//check for password in signup meta
-			$meta = unserialize($signup->meta);
+			$meta = maybe_unserialize($signup->meta);
 			if ( !empty( $meta['password'] ) ) {
 				if ( $signup_password_use_encryption == 'yes' ) {
 					$password = signup_password_decrypt($meta['password']);
 				} else {
 					$password = $meta['password'];
 				}
+				unset( $meta['password'] );
+				$meta = maybe_serialize( $meta );
+				$wpdb->update(
+					$wpdb->signups,
+					array( 'meta' => $meta ),
+					array( 'activation_key' => $key ),
+					array( '%s' ),
+					array( '%s' )
+				);
 			}
+
 		}		
 	}
 	return $password;
