@@ -11,7 +11,7 @@ WDP ID: 35
 Text Domain: signup_password
 */
 
-/* 
+/*
 Copyright 2007-2009 Incsub (http://incsub.com)
 
 This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ add_filter('random_password', 'signup_password_random_password_filter');
 function signup_password_init() {
 	if ( !is_multisite() )
 		exit( 'The Signup Password plugin is only compatible with WordPress Multisite.' );
-		
+
 	load_plugin_textdomain('signup_password', false, dirname(plugin_basename(__FILE__)).'/languages');
 }
 
@@ -62,18 +62,18 @@ function signup_password_encrypt($data) {
 	// 3 different symbols (or combinations) for obfuscation
 	// these should not appear within the original text
 	$sym = array('¶', '¥xQ', '|');
-	
+
 	foreach(range('a','z') as $key=>$val)
 	$chars[$val] = str_repeat($sym[0],($key + 1)).$sym[1];
 	$chars[' '] = $sym[2];
-	
+
 	unset($sym);
 	}
-	
+
 	// encrypt
 	$data = base64_encode(strtr($data, $chars));
 	return $data;
-	
+
 }
 
 function signup_password_decrypt($data) {
@@ -82,18 +82,18 @@ function signup_password_decrypt($data) {
 	// 3 different symbols (or combinations) for obfuscation
 	// these should not appear within the original text
 	$sym = array('¶', '¥xQ', '|');
-	
+
 	foreach(range('a','z') as $key=>$val)
 	$chars[$val] = str_repeat($sym[0],($key + 1)).$sym[1];
 	$chars[' '] = $sym[2];
-	
+
 	unset($sym);
 	}
-	
+
 	// decrypt
 	$charset = array_flip($chars);
 	$charset = array_reverse($charset, true);
-	
+
 	$data = strtr(base64_decode($data), $charset);
 	unset($charset);
 	return $data;
@@ -159,7 +159,7 @@ function signup_password_random_password_filter($password) {
 				);
 			}
 
-		}		
+		}
 	}
 	return $password;
 }
@@ -170,7 +170,7 @@ function signup_password_random_password_filter($password) {
 
 function signup_password_stylesheet() {
 	global $signup_password_form_printed;
-	
+
 	if ($signup_password_form_printed) {
 ?>
 <style type="text/css">
@@ -183,7 +183,7 @@ function signup_password_stylesheet() {
 
 function signup_password_fields_pass_through() {
 	global $signup_password_form_printed;
-	
+
 	if ( !empty( $_POST['password_1'] ) && !empty( $_POST['password_2'] ) ) {
 		$signup_password_form_printed = 1;
 		?>
@@ -200,7 +200,7 @@ function signup_password_fields_pass_through() {
 
 function signup_password_fields($errors) {
 	global $signup_password_form_printed;
-	
+
 	if ($errors && method_exists($errors, 'get_error_message')) {
 		$error = $errors->get_error_message('password_1');
 	} else {
@@ -227,14 +227,3 @@ function signup_password_init_sessions() {
         session_start();
     }
 }
-
-if ( !function_exists( 'wdp_un_check' ) ) {
-	add_action( 'admin_notices', 'wdp_un_check', 5 );
-	add_action( 'network_admin_notices', 'wdp_un_check', 5 );
-
-	function wdp_un_check() {
-		if ( !class_exists( 'WPMUDEV_Update_Notifications' ) && current_user_can( 'edit_users' ) )
-			echo '<div class="error fade"><p>' . __('Please install the latest version of <a href="http://premium.wpmudev.org/project/update-notifications/" title="Download Now &raquo;">our free Update Notifications plugin</a> which helps you stay up-to-date with the most stable, secure versions of WPMU DEV themes and plugins. <a href="http://premium.wpmudev.org/wpmu-dev/update-notifications-plugin-information/">More information &raquo;</a>', 'wpmudev') . '</a></p></div>';
-	}
-}
-
