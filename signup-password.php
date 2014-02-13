@@ -1,18 +1,20 @@
 <?php
 /*
-Plugin Name: Set Password on WordPress Multisite Blog Creation
-Plugin URI: http://premium.wpmudev.org/project/set-password-on-wordpress-mu-blog-creation
+Plugin Name: Set Password on Multisite Blog Creation
+Plugin URI: http://premium.wpmudev.org/project/set-password-on-wordpress-mu-blog-creation/
 Description: Set Password on WordPress Multisite Blog Creation
-Author: S H Mohanjith (Incsub), Andrew Billits (Incsub)
-Version: 1.1.1.3
-Author URI: http://premium.wpmudev.org
+Author: WPMU DEV
+Version: 1.1.2
+Author URI: http://premium.wpmudev.org/
 Network: true
 WDP ID: 35
 Text Domain: signup_password
 */
 
 /*
-Copyright 2007-2009 Incsub (http://incsub.com)
+Copyright 2007-20014 Incsub (http://incsub.com)
+Author - S H Mohanjith
+Contributors - Andrew Billits
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License (Version 2 - GPLv2) as published by
@@ -38,7 +40,7 @@ $signup_password_form_printed = 0;
 //---Hook-----------------------------------------------------------------//
 //------------------------------------------------------------------------//
 add_action('init', 'signup_password_init');
-add_action('init', 'signup_password_init_sessions');
+add_action('template_redirect', 'signup_password_init_sessions');
 add_action('wp_footer', 'signup_password_stylesheet');
 add_action('signup_extra_fields', 'signup_password_fields');
 add_filter('wpmu_validate_user_signup', 'signup_password_filter');
@@ -49,10 +51,10 @@ add_filter('random_password', 'signup_password_random_password_filter');
 //---Functions------------------------------------------------------------//
 //------------------------------------------------------------------------//
 
-function signup_password_init() {
-	if ( !is_multisite() )
-		exit( 'The Signup Password plugin is only compatible with WordPress Multisite.' );
+//trigger error on activation
+if ( !is_multisite() ) exit( 'The Signup Password plugin is only compatible with WordPress Multisite.' );
 
+function signup_password_init() {
 	load_plugin_textdomain('signup_password', false, dirname(plugin_basename(__FILE__)).'/languages');
 }
 
@@ -223,7 +225,13 @@ function signup_password_fields($errors) {
 }
 
 function signup_password_init_sessions() {
-    if (!session_id()) {
-        session_start();
-    }
+	if ( is_user_logged_in() ) return;
+	
+	if (!session_id()) {
+		session_start();
+	}
 }
+
+global $wpmudev_notices;
+$wpmudev_notices[] = array( 'id'=> 35, 'name'=> 'Set Password on Multisite Blog Creation', 'screens' => array() );
+include_once( dirname( __FILE__ ) . '/dash-notice/wpmudev-dash-notification.php' );
