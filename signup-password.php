@@ -128,7 +128,7 @@ function signup_password_meta_filter($meta) {
 function signup_password_random_password_filter($password) {
 	global $wpdb, $signup_password_use_encryption;
 
-	if ( ! empty($_GET['key']) ) {
+	if ( isset($_GET['key']) && ! empty($_GET['key']) ) {
 		$key = $_GET['key'];
 	} else {
 		$key = $_POST['key'];
