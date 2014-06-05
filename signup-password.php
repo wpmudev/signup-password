@@ -63,7 +63,7 @@ function signup_password_encrypt($data) {
 	{
 	// 3 different symbols (or combinations) for obfuscation
 	// these should not appear within the original text
-	$sym = array('¶', '¥xQ', '|');
+	$sym = array('âˆ‚', 'â€¢xQ', '|');
 
 	foreach(range('a','z') as $key=>$val)
 	$chars[$val] = str_repeat($sym[0],($key + 1)).$sym[1];
@@ -83,7 +83,7 @@ function signup_password_decrypt($data) {
 	{
 	// 3 different symbols (or combinations) for obfuscation
 	// these should not appear within the original text
-	$sym = array('¶', '¥xQ', '|');
+	$sym = array('âˆ‚', 'â€¢xQ', '|');
 
 	foreach(range('a','z') as $key=>$val)
 	$chars[$val] = str_repeat($sym[0],($key + 1)).$sym[1];
