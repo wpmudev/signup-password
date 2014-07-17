@@ -4,7 +4,7 @@ Plugin Name: Set Password on Multisite Blog Creation
 Plugin URI: http://premium.wpmudev.org/project/set-password-on-wordpress-mu-blog-creation/
 Description: Set Password on WordPress Multisite Blog Creation
 Author: WPMU DEV
-Version: 1.1.2.1
+Version: 1.1.2.2
 Author URI: http://premium.wpmudev.org/
 Network: true
 WDP ID: 35
@@ -130,7 +130,7 @@ function signup_password_random_password_filter($password) {
 
 	if ( isset($_GET['key']) && ! empty($_GET['key']) ) {
 		$key = $_GET['key'];
-	} else {
+	} else if ( isset($_POST['key']) && ! empty($_POST['key']) ) {
 		$key = $_POST['key'];
 	}
 	if ( !empty($_POST['password_1']) ) {
