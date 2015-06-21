@@ -4,7 +4,7 @@ Plugin Name: Set Password on Multisite Blog Creation
 Plugin URI: http://premium.wpmudev.org/project/set-password-on-wordpress-mu-blog-creation/
 Description: Set Password on WordPress Multisite Blog Creation
 Author: WPMU DEV
-Version: 1.1.2.2
+Version: 1.1.2.3
 Author URI: http://premium.wpmudev.org/
 Network: true
 WDP ID: 35
@@ -39,14 +39,14 @@ $signup_password_form_printed = 0;
 //------------------------------------------------------------------------//
 //---Hook-----------------------------------------------------------------//
 //------------------------------------------------------------------------//
-add_action('init', 'signup_password_init');
-add_action('template_redirect', 'signup_password_init_sessions');
-add_action('wp_footer', 'signup_password_stylesheet');
-add_action('signup_extra_fields', 'signup_password_fields');
-add_filter('wpmu_validate_user_signup', 'signup_password_filter');
-add_filter('signup_blogform', 'signup_password_fields_pass_through');
-add_filter('add_signup_meta', 'signup_password_meta_filter',99);
-add_filter('random_password', 'signup_password_random_password_filter');
+add_action('init', 'wpmu_signup_password_init');
+add_action('template_redirect', 'wpmu_signup_password_init_sessions');
+add_action('wp_footer', 'wpmu_signup_password_stylesheet');
+add_action('signup_extra_fields', 'wpmu_signup_password_fields');
+add_filter('wpmu_validate_user_signup', 'wpmu_signup_password_filter');
+add_filter('signup_blogform', 'wpmu_signup_password_fields_pass_through');
+add_filter('add_signup_meta', 'wpmu_signup_password_meta_filter',99);
+add_filter('random_password', 'wpmu_signup_password_random_password_filter');
 //------------------------------------------------------------------------//
 //---Functions------------------------------------------------------------//
 //------------------------------------------------------------------------//
@@ -54,11 +54,23 @@ add_filter('random_password', 'signup_password_random_password_filter');
 //trigger error on activation
 if ( !is_multisite() ) exit( 'The Signup Password plugin is only compatible with WordPress Multisite.' );
 
-function signup_password_init() {
+if ( ! function_exists( 'signup_password_init' ) ) {
+	function signup_password_init() {
+		return wpmu_signup_password_init();
+	}
+}
+
+function wpmu_signup_password_init() {
 	load_plugin_textdomain('signup_password', false, dirname(plugin_basename(__FILE__)).'/languages');
 }
 
-function signup_password_encrypt($data) {
+if ( ! function_exists( 'signup_password_encrypt' ) ) {
+	function signup_password_encrypt() {
+		return wpmu_signup_password_encrypt();
+	}
+}
+
+function wpmu_signup_password_encrypt($data) {
 	if(!isset($chars))
 	{
 	// 3 different symbols (or combinations) for obfuscation
@@ -78,7 +90,13 @@ function signup_password_encrypt($data) {
 
 }
 
-function signup_password_decrypt($data) {
+if ( ! function_exists( 'signup_password_decrypt' ) ) {
+	function signup_password_decrypt() {
+		return wpmu_signup_password_decrypt();
+	}
+}
+
+function wpmu_signup_password_decrypt($data) {
 	if(!isset($chars))
 	{
 	// 3 different symbols (or combinations) for obfuscation
@@ -101,7 +119,13 @@ function signup_password_decrypt($data) {
 	return $data;
 }
 
-function signup_password_filter($content) {
+if ( ! function_exists( 'signup_password_filter' ) ) {
+	function signup_password_filter() {
+		return wpmu_signup_password_filter();
+	}
+}
+
+function wpmu_signup_password_filter($content) {
 	$password_1 = isset($_POST['password_1'])?$_POST['password_1']:'';
 	$password_2 = isset($_POST['password_2'])?$_POST['password_2']:'';
 	if ( !empty( $password_1 )  && $_POST['stage'] == 'validate-user-signup' ) {
@@ -112,12 +136,18 @@ function signup_password_filter($content) {
 	return $content;
 }
 
-function signup_password_meta_filter($meta) {
+if ( ! function_exists( 'signup_password_meta_filter' ) ) {
+	function signup_password_meta_filter() {
+		return wpmu_signup_password_meta_filter();
+	}
+}
+
+function wpmu_signup_password_meta_filter($meta) {
 	global $signup_password_use_encryption;
 	$password_1 = isset($_POST['password_1'])?$_POST['password_1']:'';
 	if ( !empty( $password_1 ) ) {
 		if ( $signup_password_use_encryption == 'yes' ) {
-			$password_1 = signup_password_encrypt($password_1);
+			$password_1 = wpmu_signup_password_encrypt($password_1);
 		}
 		$add_meta = array('password' => $password_1);
 		$meta = array_merge($add_meta, $meta);
@@ -125,7 +155,13 @@ function signup_password_meta_filter($meta) {
 	return $meta;
 }
 
-function signup_password_random_password_filter($password) {
+if ( ! function_exists( 'signup_password_random_password_filter' ) ) {
+	function signup_password_random_password_filter() {
+		return wpmu_signup_password_random_password_filter();
+	}
+}
+
+function wpmu_signup_password_random_password_filter($password) {
 	global $wpdb, $signup_password_use_encryption;
 
 	if ( isset($_GET['key']) && ! empty($_GET['key']) ) {
@@ -146,7 +182,7 @@ function signup_password_random_password_filter($password) {
 			$meta = maybe_unserialize($signup->meta);
 			if ( !empty( $meta['password'] ) ) {
 				if ( $signup_password_use_encryption == 'yes' ) {
-					$password = signup_password_decrypt($meta['password']);
+					$password = wpmu_signup_password_decrypt($meta['password']);
 				} else {
 					$password = $meta['password'];
 				}
@@ -170,7 +206,13 @@ function signup_password_random_password_filter($password) {
 //---Output Functions-----------------------------------------------------//
 //------------------------------------------------------------------------//
 
-function signup_password_stylesheet() {
+if ( ! function_exists( 'signup_password_stylesheet' ) ) {
+	function signup_password_stylesheet() {
+		return wpmu_signup_password_stylesheet();
+	}
+}
+
+function wpmu_signup_password_stylesheet() {
 	global $signup_password_form_printed;
 
 	if ($signup_password_form_printed) {
@@ -183,7 +225,13 @@ function signup_password_stylesheet() {
 	}
 }
 
-function signup_password_fields_pass_through() {
+if ( ! function_exists( 'signup_password_fields_pass_through' ) ) {
+	function signup_password_fields_pass_through() {
+		return wpmu_signup_password_fields_pass_through();
+	}
+}
+
+function wpmu_signup_password_fields_pass_through() {
 	global $signup_password_form_printed;
 
 	if ( !empty( $_POST['password_1'] ) && !empty( $_POST['password_2'] ) ) {
@@ -200,7 +248,13 @@ function signup_password_fields_pass_through() {
 	}
 }
 
-function signup_password_fields($errors) {
+if ( ! function_exists( 'signup_password_fields' ) ) {
+	function signup_password_fields() {
+		return wpmu_signup_password_fields();
+	}
+}
+
+function wpmu_signup_password_fields($errors) {
 	global $signup_password_form_printed;
 
 	if ($errors && method_exists($errors, 'get_error_message')) {
@@ -224,7 +278,13 @@ function signup_password_fields($errors) {
 	<?php
 }
 
-function signup_password_init_sessions() {
+if ( ! function_exists( 'signup_password_init_sessions' ) ) {
+	function signup_password_init_sessions() {
+		return wpmu_signup_password_init_sessions();
+	}
+}
+
+function wpmu_signup_password_init_sessions() {
 	if ( is_user_logged_in() ) return;
 	
 	if (!session_id()) {
